@@ -1,0 +1,4 @@
+pyglet
+requests
+Pillow
+nuitka
