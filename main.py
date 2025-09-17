@@ -260,10 +260,13 @@ class LauncherWindow:
             self.window.geometry(f'+{new_x}+{new_y}')
 
     def relative_to_assets(self, path: str) -> Path:
-        if getattr(sys, "frozen", False):
-            base_path = Path(sys.executable).parent
-        else:
-            base_path = Path(__file__).parent
+        try:
+            base_path = Path(sys._MEIPASS)
+        except Exception:
+            if getattr(sys, "frozen", False):
+                base_path = Path(sys.executable).parent
+            else:
+                base_path = Path(__file__).parent
 
         ASSETS_PATH = base_path / "assets"
         return ASSETS_PATH / path
