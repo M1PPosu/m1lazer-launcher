@@ -45,7 +45,7 @@ class LauncherWindow:
         self.setup_window()
         self.create_widgets()
         self.bind_events()
-        self.window.iconbitmap(self.relative_to_assets("icon.ico"))
+        self.window.iconphoto(False, PhotoImage(file=self.relative_to_assets("icon.png")))
 
         self.window.after(1, self.dot_anim)
         self.window.attributes('-alpha', 0.0)
