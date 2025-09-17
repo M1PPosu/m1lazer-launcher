@@ -75,7 +75,7 @@ If you have a suggestion that would make this better, please fork the repo and c
 <!-- LICENSE -->
 ## License
 
-Distributed under the project_license. See `LICENSE` for more information.
+Distributed under the GPLv3. See `LICENSE` for more information.
 
 
 
