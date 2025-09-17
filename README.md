@@ -30,7 +30,7 @@
 
 M1Lazer Launcher is a small tool for connecting to M1Lazer, a private osu!lazer server.  
 It removes the need for manual configuration by letting you launch osu!lazer directly into the server.  
-The launcher handles blocking connection official servers, lets you set or detect your osu!lazer installation path, and keeps the setup simple and minimal.
+The launcher handles blocking connection official servers, detects your osu!lazer installation path, and keeps the setup simple and minimal.
 
 
 
