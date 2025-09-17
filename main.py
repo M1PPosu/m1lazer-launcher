@@ -236,12 +236,12 @@ class LauncherWindow:
             except:
                 pass
             if sysoschk() == "Linux":
-                os.makedirs(os.getenv("HOME") + "/.local/share/osu/rulesets/" + filename, exist_ok=True)
+                os.makedirs(os.getenv("HOME") + "/.local/share/osu/rulesets/", exist_ok=True)
                 copyfile(os.path.join(topath, filename), os.getenv("HOME") + "/.local/share/osu/rulesets/" + filename)
                 with open(os.getenv("HOME") + "/.local/share/osu/authlib_local_config.json", "w") as f:
                     f.write('{"ApiUrl":"https://lazer-api.m1pposu.dev","WebsiteUrl":"https://lazer.m1pposu.dev","ClientId":"","ClientSecret":"","SpectatorUrl":"","MultiplayerUrl":"","MetadataUrl":"","BeatmapSubmissionServiceUrl":""}')
             if sysoschk() == "Windows":
-                os.makedirs(os.path.join(os.getenv("APPDATA"), r"osu\rulesets", filename), exist_ok=True)
+                os.makedirs(os.path.join(os.getenv("APPDATA"), r"osu\rulesets"), exist_ok=True)
                 copyfile(os.path.join(topath, filename), os.path.join(os.getenv("APPDATA"), r"osu\rulesets", filename))
                 with open(os.getenv("APPDATA") + "/osu/authlib_local_config.json", "w") as f:
                     f.write('{"ApiUrl":"https://lazer-api.m1pposu.dev","WebsiteUrl":"https://lazer.m1pposu.dev","ClientId":"","ClientSecret":"","SpectatorUrl":"","MultiplayerUrl":"","MetadataUrl":"","BeatmapSubmissionServiceUrl":""}')
