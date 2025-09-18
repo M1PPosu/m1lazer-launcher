@@ -20,7 +20,7 @@
   <p align="center">
     A simple launcher for M1Lazer, a private osu!lazer server.
     <br />
-    <a href="https://github.com/M1PPosu/m1lazer-launcher/releases/latest/download/m1lazer.exe"><strong>Download »</strong></a>
+    <a href="https://github.com/M1PPosu/m1lazer-launcher/releases/latest/download/m1lazer-setup.exe"><strong>Download »</strong></a>
     <br />
 
 </div>
@@ -38,7 +38,7 @@ The launcher handles blocking connection official servers, detects your osu!laze
 ## Installation
 
 ### Windows
-- Download [the latest release](https://github.com/M1PPosu/m1lazer-launcher/releases/latest/download/m1lazer.exe)
+- Download [the latest release](https://github.com/M1PPosu/m1lazer-launcher/releases/latest/download/m1lazer-setup.exe)
 - Run the .exe file
 
 ### Linux
