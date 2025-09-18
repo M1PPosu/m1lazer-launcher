@@ -1,4 +1,4 @@
 requests
 Pillow
-nuitka
 pyinstaller
+psutil

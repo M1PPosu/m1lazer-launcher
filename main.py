@@ -3,6 +3,8 @@ import os, sys
 from hashlib import sha256
 import requests
 import stat
+import time
+from psutil import process_iter
 import urllib.request
 from tkinter import Tk, Canvas, Button, Label, PhotoImage, messagebox
 from PIL import Image, ImageTk
@@ -10,6 +12,7 @@ from platform import system as sysoschk
 from shutil import copyfile
 from subprocess import run as runproc
 from subprocess import Popen, TimeoutExpired
+from subprocess import PIPE as sPIPE
 import threading
 if sysoschk() == "Windows":
     import ctypes
@@ -22,7 +25,7 @@ def run_as_admin_and_wait(cmd_str):
     if sysoschk() == "Windows":
         try:
             if ctypes.windll.shell32.IsUserAnAdmin():
-                result = subprocess.run(cmd_str, shell=True)
+                result = runproc(cmd_str, shell=True, stdout=sPIPE, stderr=sPIPE)
                 return result.returncode == 0
             else:
                 params = f'/c {cmd_str}'
@@ -58,6 +61,7 @@ class LauncherWindow:
         self.isdotanim = False
         self.isplayon = True
         self.isaware = False
+        self.hollup = False
         
         self.setup_settings()
 
@@ -123,6 +127,7 @@ class LauncherWindow:
                         if proc.returncode != 0:
                             todl = True
                     except TimeoutExpired:
+                        self.hollup = True
                         self.window.after(0, self.close_window)
                     except Exception:
                         todl = True
@@ -132,10 +137,11 @@ class LauncherWindow:
                             urllib.request.urlretrieve(url, install_path)
                             proc2 = Popen([install_path]).wait(timeout=120)
                             if proc2.returncode != 0:
+                                self.hollup = True
                                 proc2 = Popen([local_path])
                                 self.window.after(0, self.close_window)
                             else:
-                                raise ExceptionType("Unknown error")
+                                raise Exception("Unknown error")
                     except Exception as ex:
                         def show_error():
                             self.window.withdraw()
@@ -279,11 +285,30 @@ class LauncherWindow:
             self.window.attributes('-alpha', trns)
             self.window.after(20, self.close_window, trns)
         else:
-            self.window.destroy()
+            self.window.withdraw()
+            start = time.time()
+            while time.time() - start < 10.0:
+                processes = [p for p in process_iter(['name']) if p.info['name'] == "osu!.exe"]
+                if processes or not self.hollup:
+                    if self.hollup:
+                        proc = processes[0]
+                        proc.wait()
+                    try:
+                        if sysoschk() == 'Windows':
+                            os.remove(os.path.join(os.getenv("APPDATA"), "osu", "rulesets", "osu.Game.Rulesets.AuthlibInjection.dll"))
+                    except:
+                        pass
+                    try:
+                        self.deactiveset(self.button_check)
+                    except:
+                        pass
+                    sys.exit(0)
+                time.sleep(1)
+            sys.exit(1)
 
     def fade_in(self, trns=0.0):
         if not self.isaware:
-            messagebox.showinfo(title="IMPORTANT, PLEASE READ", message="IMPORTANT: This is a program that configures access to M1Lazer, HOWEVER settings changed in this program affect your osu!lazer install and also disable access to ppy.sh\n\nIN ORDER TO REGAIN ACCESS TO PPY.SH YOU WILL NEED TO RUN THIS PROGRAM AGAIN AND UNCHECK ALL OF THE CHECKBOXES!!!")
+            messagebox.showinfo(title="IMPORTANT, PLEASE READ", message="IMPORTANT: This is a program that configures access to M1Lazer, HOWEVER settings changed in this program affect your osu!lazer install and also disable access to ppy.sh\n\nIN ORDER TO REGAIN ACCESS TO PPY.SH AFTER A LAUNCHER CRASH YOU WILL NEED TO RUN THIS PROGRAM AGAIN AND UNCHECK ALL OF THE CHECKBOXES!!!")
             self.isaware = True
         if trns < 1.0:
             trns += 0.05
@@ -513,4 +538,30 @@ class LauncherWindow:
         self.text.bind("<Button-1>", self.bootstrap)
 
 if __name__ == "__main__":
+    try:
+        if sys.argv[1] == "cleanup":
+            if sysoschk() == 'Windows':
+                try:
+                    for user in os.listdir(r"C:\Users"):
+                        user_path = os.path.join(r"C:\Users", user)
+                        appdata_path = os.path.join(user_path, "AppData", "Roaming", "osu", "rulesets", "osu.Game.Rulesets.AuthlibInjection.dll")
+                        
+                        if os.path.isfile(appdata_path):
+                            try:
+                                os.remove(appdata_path)
+                            except:
+                                pass
+                except:
+                    pass
+                hosts_file = r"C:\Windows\System32\drivers\etc\hosts"
+                temp_file = os.path.join(os.environ["TEMP"], "hosts_clean.txt")
+                with open(hosts_file, "r") as f:
+                    filtered = [line for line in f if "ppy.sh" not in line]
+                with open(temp_file, "w") as f:
+                    f.writelines(filtered)
+                if run_as_admin_and_wait(f'copy "{temp_file}" "{hosts_file}" /Y'):
+                    sys.exit(0)
+                sys.exit(1)
+    except IndexError:
+        pass
     LauncherWindow()

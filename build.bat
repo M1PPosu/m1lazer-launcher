@@ -1,1 +1,1 @@
-pyinstaller --noconfirm --onefile --windowed --icon "assets\icon.ico" --name "m1lazer" --add-data "assets;assets/"  "main.py"
+pyinstaller --noconfirm --uac-admin --windowed --icon "assets\icon.ico" --name "m1lazer" --add-data "assets;assets/"  "main.py"
