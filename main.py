@@ -103,27 +103,22 @@ class LauncherWindow:
                             pass
                     try:
                         if not os.path.exists(local_path) or todl:
-                            self.window.after(0, lambda: setattr(self, 'base_string', "Download"))
                             urllib.request.urlretrieve(url, local_path)
                             st = os.stat(local_path)
                             os.chmod(local_path, st.st_mode | stat.S_IEXEC)
                             proc = Popen([local_path])
                             self.window.after(0, self.close_window)
                     except Exception as e:
-                        def show_error():
-                            self.window.withdraw()
-                            messagebox.showerror(title="Error!", message="Unable to download file. Check your disk space and try again\n\n" + str(e))
-                            self.window.destroy()
-                            self.close_window()
-                        self.window.after(0, show_error)
+                        self.window.after(0, self.show_error)
                 elif sysoschk() == 'Windows':
                     url = "https://github.com/ppy/osu/releases/latest/download/install.exe"
                     local_path = os.path.join(os.getenv("LOCALAPPDATA"), "osulazer", "current", "osu!.exe")
                     install_path = os.path.join(os.getenv("APPDATA"), "m1pplazer", "install.exe")
                     todl = False
                     try:
+                        self.hollup = True
                         proc = Popen([local_path])
-                        proc.wait(timeout=1)
+                        proc.wait(timeout=5)
                         if proc.returncode != 0:
                             todl = True
                     except TimeoutExpired:
@@ -133,24 +128,17 @@ class LauncherWindow:
                         todl = True
                     try:
                         if todl:
-                            self.window.after(0, lambda: setattr(self, 'base_string', "Download"))
                             urllib.request.urlretrieve(url, install_path)
-                            proc2 = Popen([install_path]).wait(timeout=120)
-                            if proc2.returncode != 0:
-                                self.hollup = True
-                                proc2 = Popen([local_path])
-                                self.window.after(0, self.close_window)
-                            else:
-                                raise Exception("Unknown error")
+                            proc2 = Popen([install_path])
+                            self.window.after(0, self.close_window)
                     except Exception as ex:
-                        def show_error():
-                            self.window.withdraw()
-                            messagebox.showerror(title="Error!", message="Unable to download file. Check your disk space and try again\n\n" + str(ex))
-                            self.window.destroy()
-                            self.close_window()
-                        self.window.after(0, show_error)
+                        print(ex)
             threading.Thread(target=task, daemon=True).start()
-
+    def show_error(self):
+        self.window.withdraw()
+        messagebox.showerror(title="Error!", message="Unable to download file. Check your disk space and try again")
+        self.window.destroy()
+        self.close_window()
     def setup_settings(self):
         found = False
         if sysoschk() == 'Linux':
@@ -202,37 +190,28 @@ class LauncherWindow:
             topath = os.getenv("HOME") + "/.local/share/m1pplazer"
         if sysoschk() == 'Windows':
             topath = os.getenv("APPDATA") + "\\m1pplazer"
-            
+        
         url = "https://github.com/MingxuanGame/LazerAuthlibInjection/releases/latest/download/osu.Game.Rulesets.AuthlibInjection.dll"
         filename = "osu.Game.Rulesets.AuthlibInjection.dll"
         try:
-            h = sha256()
-            with open(os.path.join(topath, filename), "rb") as f:
-                for chunk in iter(lambda: f.read(8192), b""):
-                    h.update(chunk)
-            calculated_sha256 = h.hexdigest() 
+            os.remove(os.path.join(topath, filename))
         except:
-            calculated_sha256 = 0
-        if not os.path.isfile(os.path.join(topath, filename)) or not requests.get("https://assets.m1pposu.dev/lazer/injector_sha.txt").text == calculated_sha256:
-            try:
-                os.remove(os.path.join(topath, filename))
-            except Exception as e:
-                print(str(e))
-            self.isdotanim = True
-            self.isplayon = False
-            self.text.configure(bg="#2B1F2E")
-            self.base_string = "Download"
-            try:
-                os.makedirs(topath, exist_ok=True)
-                dest_file = os.path.join(topath, filename)
-                response = requests.get(url)
-                response.raise_for_status()
-                with open(dest_file, "wb") as f:
-                    f.write(response.content)
-            except Exception as e:
-                self.window.withdraw()
-                messagebox.showerror(title="Error!", message="Unable to download file. Check your internet connection and try again\n\n" + str(e))
-                self.window.destroy()
+            pass
+        self.isdotanim = True
+        self.isplayon = False
+        self.text.configure(bg="#2B1F2E")
+        self.base_string = "Download"
+        try:
+            os.makedirs(topath, exist_ok=True)
+            dest_file = os.path.join(topath, filename)
+            response = requests.get(url)
+            response.raise_for_status()
+            with open(dest_file, "wb") as f:
+                f.write(response.content)
+        except Exception as e:
+            self.window.withdraw()
+            messagebox.showerror(title="Error!", message="Unable to download file. Check your internet connection and try again\n\n" + str(e))
+            self.window.destroy()
         try:
             try:
                 if sysoschk() == "Linux":
@@ -247,8 +226,8 @@ class LauncherWindow:
                 with open(os.getenv("HOME") + "/.local/share/osu/authlib_local_config.json", "w") as f:
                     f.write('{"ApiUrl":"https://lazer-api.m1pposu.dev","WebsiteUrl":"https://lazer.m1pposu.dev","ClientId":"","ClientSecret":"","SpectatorUrl":"","MultiplayerUrl":"","MetadataUrl":"","BeatmapSubmissionServiceUrl":""}')
             if sysoschk() == "Windows":
-                os.makedirs(os.path.join(os.getenv("APPDATA"), r"osu\rulesets"), exist_ok=True)
-                copyfile(os.path.join(topath, filename), os.path.join(os.getenv("APPDATA"), r"osu\rulesets", filename))
+                os.makedirs(os.path.join(os.getenv("APPDATA"), "osu", "rulesets"), exist_ok=True)
+                copyfile(os.path.join(topath, filename), os.path.join(os.getenv("APPDATA"), "osu", "rulesets", filename))
                 with open(os.getenv("APPDATA") + "/osu/authlib_local_config.json", "w") as f:
                     f.write('{"ApiUrl":"https://lazer-api.m1pposu.dev","WebsiteUrl":"https://lazer.m1pposu.dev","ClientId":"","ClientSecret":"","SpectatorUrl":"","MultiplayerUrl":"","MetadataUrl":"","BeatmapSubmissionServiceUrl":""}')
             self.isdotanim = False
@@ -285,26 +264,30 @@ class LauncherWindow:
             self.window.attributes('-alpha', trns)
             self.window.after(20, self.close_window, trns)
         else:
-            self.window.withdraw()
-            start = time.time()
-            while time.time() - start < 10.0:
-                processes = [p for p in process_iter(['name']) if p.info['name'] == "osu!.exe"]
-                if processes or not self.hollup:
-                    if self.hollup:
-                        proc = processes[0]
-                        proc.wait()
-                    try:
-                        if sysoschk() == 'Windows':
-                            os.remove(os.path.join(os.getenv("APPDATA"), "osu", "rulesets", "osu.Game.Rulesets.AuthlibInjection.dll"))
-                    except:
-                        pass
-                    try:
-                        self.deactiveset(self.button_check)
-                    except:
-                        pass
-                    sys.exit(0)
-                time.sleep(1)
-            sys.exit(1)
+            if sysoschk() == "Windows":
+                user32 = ctypes.windll.user32
+                FindWindow = user32.FindWindowW
+                self.window.withdraw()
+                start = time.time()
+                while time.time() - start < 90.0:
+                    hwnd = FindWindow(None, "osu!")
+                    processes = [p for p in process_iter(['name']) if p.info['name'] == "osu!.exe"]
+                    if processes and hwnd != 0 or not self.hollup:
+                        if self.hollup:
+                            proc = processes[0]
+                            proc.wait()
+                        try:
+                            if sysoschk() == 'Windows':
+                                os.remove(os.path.join(os.getenv("APPDATA"), "osu", "rulesets", "osu.Game.Rulesets.AuthlibInjection.dll"))
+                        except:
+                            pass
+                        try:
+                            self.deactiveset(self.button_check)
+                        except:
+                            pass
+                        sys.exit(0)
+                    time.sleep(1)
+                sys.exit(1)
 
     def fade_in(self, trns=0.0):
         if not self.isaware:
